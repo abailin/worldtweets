@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>World Tweets</title>
+	<style>
+		.graticule {
+			fill: none;
+			stroke: #777;
+			stroke-width: .5px;
+			stroke-opacity: .5;
+		}
+		.land {
+			fill: #222;
+		}
+		.boundary {
+			fill: none;
+			stroke: #fff;
+			stroke-width: .5px;
+		}
+	</style>
+	<script charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
+	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
+</head>
+<body>
+	<h1>World Tweets</h1>
+	<h2>Real time mapping of tweets around the world</h2>
+	<p>Tweets are sampled from <a href="https://dev.twitter.com/docs/streaming-apis/streams/public">Twitter's Streaming API</a> using <a href="http://nodejs.org">node.js</a>, delivered to your browser via <a href="http://socket.io">socket.io</a>, and mapped using <a href="http://d3js.org">D3.js</a>. Code available at <a href="https://github.com/abailin/worldtweets">https://github.com/abailin/worldtweets</a>.</p>
+	<div id="stats">
+		Tweets mapped: <span class="tweet-count">0</span> <br>
+		Tweets processed on server: <span class="server-total-count"></span>
+	</div>
+
+	<div id="map"></div>
+
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+
+var socket = io.connect();
+var num_tweets = 0;
+
+var width = 960,
+		height = 700;
+
+var projection = d3.geo.stereographic()
+		.scale(245)
+		.translate([width / 2, height / 2])
+		.rotate([-20, 0])
+		.clipAngle(180 - 1e-4)
+		.clipExtent([[0, 0], [width, height]])
+		.precision(.1);
+
+var path = d3.geo.path()
+		.projection(projection);
+
+var graticule = d3.geo.graticule();
+
+var svg = d3.select("#map").append("svg")
+		.attr("width", width)
+		.attr("height", height);
+
+svg.append("path")
+		.datum(graticule)
+		.attr("class", "graticule")
+		.attr("d", path);
+
+d3.json("/json/world-50m.json", function(error, world) {
+	svg.insert("path", ".graticule")
+			.datum(topojson.feature(world, world.objects.land))
+			.attr("class", "land")
+			.attr("d", path);
+
+	svg.insert("path", ".graticule")
+			.datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+			.attr("class", "boundary")
+			.attr("d", path);
+});
+
+d3.select(self.frameElement).style("height", height + "px");
+
+var fill_colors = ["red", "green", "blue", "yellow", "cyan", "magenta"];
+var num_msgs = 0;
+
+socket.on("stats", function(response) {
+	// update total server tweets processed
+	$(".server-total-count").text(response.data.total_tweets);
+});
+
+socket.on("msg", function(data) {
+	
+	num_msgs++;
+	$(".tweet-count").text(num_msgs);
+
+	if (data.coords) {
+		// place point on map
+		var p = projection([data.coords[0], data.coords[1]]);
+		var circle = svg.append("circle")
+			.attr("cx", p[0])
+			.attr("cy", p[1])
+			.attr("r", 4)
+			//.attr("fill", fill_colors[num_msgs%6])
+			.attr("fill","red")
+			.attr("opacity", 0.6);
+
+		// remove point after some time
+		setTimeout(function() {
+			circle.remove();
+		}, 15000);
+	}
+	else if (data.message) {
+		console.log("Message from server: " + data.message);
+	}
+	
+});
+
+	</script>
+
+</body>
+</html>
