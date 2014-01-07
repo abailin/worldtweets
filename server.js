@@ -4,7 +4,21 @@ var express = require('express');
 var app = express();
 var io = require('socket.io').listen(app.listen(port));
 var twitter = require('ntwitter');
-var config = require('./config/config.js');
+var config = {};
+
+try {
+	config = require('./config/config.js');
+} catch (e) {
+	// config file not available; try heroku config vars
+	config = {
+		twitter: {
+			consumer_key: process.env.consumer_key,
+			consumer_secret: process.env.consumer_secret,
+			access_token_key: process.env.access_token_key,
+			access_token_secret: process.env.access_token_secret
+		}
+	};
+}
 
 var stats = {
 	total_tweets: 0,
