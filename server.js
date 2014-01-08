@@ -1,3 +1,5 @@
+try { require('newrelic'); } catch(e) { }
+
 // heroku assigns port randomly, when running locally, port==5000
 var port = process.env.PORT || 5000;
 var express = require('express');
