@@ -24,7 +24,8 @@ try {
 
 var stats = {
 	total_tweets: 0,
-	geo_tweets: 0
+	geo_tweets: 0,
+	connected_clients: 0
 };
 
 // URL Routes
@@ -40,9 +41,19 @@ app.get('/json/world-50m.json', function(req, res) {
 
 console.log(' >> Listening on port ' + port);
 
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function (socket)
+{
 	socket.emit('msg', { message: 'Welcome.' });
+
+	stats.connected_clients++;
+
+	socket.on('disconnect', function() {
+		stats.connected_clients--;
+	});
+
+
 });
+
 
 // instantiate twitter class
 var twit = new twitter({
@@ -70,5 +81,8 @@ setInterval(function() {
 
 function print_status() {
 	// var geo_pct = Math.round( (stats.geo_tweets / stats.total_tweets) * 100 * 10 )/10;
-	io.sockets.emit('stats', { data: { total_tweets: stats.total_tweets } });
+	io.sockets.emit('stats', { data: { 
+		total_tweets: stats.total_tweets,
+		connected_clients: stats.connected_clients
+	} });
 }
