@@ -28,7 +28,12 @@
 	<p>Tweets are sampled from <a href="https://dev.twitter.com/docs/streaming-apis/streams/public">Twitter's Streaming API</a> using <a href="http://nodejs.org">node.js</a>, delivered to your browser via <a href="http://socket.io">socket.io</a>, and mapped using <a href="http://d3js.org">D3.js</a>. Code available at <a href="https://github.com/abailin/worldtweets">https://github.com/abailin/worldtweets</a>.</p>
 	<div id="stats">
 		Tweets mapped: <span class="tweet-count">0</span> <br>
-		Tweets processed on server: <span class="server-total-count"></span>
+		
+		<strong>Server info</strong> <br>
+		Geo tweets: <span class="server-geo-count">0</span> <br>
+		Total tweets: <span class="server-total-count">0</span> <br>
+		Uptime: <span class="server-uptime">0</span> <br>
+		Connected clients: <span class="server-connected-clients">0</span>
 	</div>
 
 	<div id="map"></div>
@@ -80,17 +85,20 @@ d3.json("/json/world-50m.json", function(error, world) {
 d3.select(self.frameElement).style("height", height + "px");
 
 var fill_colors = ["red", "green", "blue", "yellow", "cyan", "magenta"];
-var num_msgs = 0;
+var num_tweets_mapped = 0;
 
 socket.on("stats", function(response) {
 	// update total server tweets processed
-	$(".server-total-count").text(response.data.total_tweets);
+	$(".server-total-count").text(response.data.tt);
+	$(".server-geo-count").text(response.data.gt);
+	$(".server-uptime").text(response.data.ut);
+	$(".server-connected-clients").text(response.data.cc);
 });
 
 socket.on("msg", function(data) {
 	
-	num_msgs++;
-	$(".tweet-count").text(num_msgs);
+	num_tweets_mapped++;
+	$(".tweet-count").text(num_tweets_mapped);
 
 	if (data.coords) {
 		// place point on map
@@ -99,13 +107,14 @@ socket.on("msg", function(data) {
 			.attr("cx", p[0])
 			.attr("cy", p[1])
 			.attr("r", 4)
-			//.attr("fill", fill_colors[num_msgs%6])
+			//.attr("fill", fill_colors[num_tweets_mapped%6])
 			.attr("fill","red")
 			.attr("opacity", 0.6);
 
 		// remove point after some time
 		setTimeout(function() {
 			circle.remove();
+			num_tweets_mapped--;
 		}, 15000);
 	}
 	else if (data.message) {

@@ -25,7 +25,8 @@ try {
 var stats = {
 	total_tweets: 0,
 	geo_tweets: 0,
-	connected_clients: 0
+	connected_clients: 0,
+	time_start: Date.now()
 };
 
 // URL Routes
@@ -80,9 +81,10 @@ setInterval(function() {
 }, 1000);
 
 function print_status() {
-	// var geo_pct = Math.round( (stats.geo_tweets / stats.total_tweets) * 100 * 10 )/10;
 	io.sockets.emit('stats', { data: { 
-		total_tweets: stats.total_tweets,
-		connected_clients: stats.connected_clients
+		tt: stats.total_tweets, // total tweets
+		gt: stats.geo_tweets, // geo tweets
+		ut: Date.now() - stats.time_start, // uptime in ms
+		cc: stats.connected_clients // connected clients
 	} });
 }
