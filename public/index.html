@@ -2,22 +2,10 @@
 <head>
 	<meta charset="utf-8">
 	<title>World Tweets</title>
-	<style>
-		.graticule {
-			fill: none;
-			stroke: #777;
-			stroke-width: .5px;
-			stroke-opacity: .5;
-		}
-		.land {
-			fill: #222;
-		}
-		.boundary {
-			fill: none;
-			stroke: #fff;
-			stroke-width: .5px;
-		}
-	</style>
+
+	<link type="text/css" rel="stylesheet" href="/css/bootstrap-lumen.min.css">
+	<link type="text/css" rel="stylesheet" href="/css/worldtweets.css">
+	
 	<script charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
 	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
@@ -25,21 +13,79 @@
 	<script charset="utf-8" src="/js/worldtweets.js"></script>
 </head>
 <body>
-	<h1>World Tweets</h1>
-	<h2>Real time mapping of tweets around the world</h2>
-	<p>Tweets are sampled from <a href="https://dev.twitter.com/docs/streaming-apis/streams/public">Twitter's Streaming API</a> using <a href="http://nodejs.org">node.js</a>, delivered to your browser via <a href="http://socket.io">socket.io</a>, and mapped using <a href="http://d3js.org">D3.js</a>. Code available at <a href="https://github.com/abailin/worldtweets">https://github.com/abailin/worldtweets</a>.</p>
-	<div id="stats">
-		Tweets mapped: <span class="tweet-count">0</span> <br>
+	
+	<!--
+	<div class="navbar navbar-default navbar-static-top" role="navigation">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+	            <span class="sr-only">Toggle navigation</span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	          </button>
+	          <a class="navbar-brand" href="#">World Tweets</a>
+	        </div>
+	        <div class="navbar-collapse collapse">
+	          <ul class="nav navbar-nav">
+	          </ul>
+	          <ul class="nav navbar-nav navbar-right">
+	            <li><a href="https://github.com/abailin/worldtweets">Source on Github</a></li>
+	          </ul>
+	        </div>
+	      </div>
+	    </div>
+	-->
+	
+	<div class="container">	
 		
-		<strong>Server info</strong> <br>
-		Geo tweets: <span class="server-geo-count">0</span> <br>
-		Total tweets: <span class="server-total-count">0</span> <br>
-		Uptime: <span class="server-uptime">0</span> <br>
-		Connected clients: <span class="server-connected-clients">0</span>
+		<div class="row heading">
+			<h2>World Tweets: Real time mapping of tweets around the world.</h2>
+		</div>
+		
+		<div class="row description">
+			<div class="col-sm-7 about">
+				<p>What you see below are tweets hitting the internet in real-time, along with the location where they were tweeted from. Tweets are removed from the map every 10 seconds to make room for new ones.</p>
+				<p>
+					Tweets are sampled from <a href="https://dev.twitter.com/docs/streaming-apis/streams/public">Twitter's Streaming API</a> 
+					using <a href="http://nodejs.org">node.js</a>, 
+					delivered to your browser via <a href="http://socket.io">socket.io</a>, 
+					and mapped using <a href="http://d3js.org">D3.js</a>. 
+					Code available at <a href="https://github.com/abailin/worldtweets">https://github.com/abailin/worldtweets</a>.
+				</p>
+			</div>
+	
+			<div class="col-sm-5 stats" id="stats">
+				<div class="row">
+					<div class="col-sm-6">
+						<strong>Tweet Info</strong><br>
+						Tweet on map: <span class="tweet-count">0</span> <br>
+						Geo tweets: <span class="server-geo-count">0</span> <br>
+						Total tweets: <span class="server-total-count">0</span> <br>
+					</div>
+					<div class="col-sm-6">
+						<strong>Server Info</strong><br>
+						Incoming tweets/sec: <span class="tweets-per-sec"></span><br>
+						Uptime: <span class="server-uptime">0</span> <br>
+						Connected clients: <span class="server-connected-clients">0</span><br>
+					</div>
+				</div>
+				
+			</div>
+			
+		</div>
+		
+		<div class="row">
+			<div id="map"></div>
+		</div>
+
 	</div>
-
-	<div id="map"></div>
-
+	
+	<footer>
+		<p><strong>World Tweets</strong></p>
+		<p>Built by <a href="http://adambailin.com">Adam Bailin</a></p>
+		<p><a href="https://github.com/abailin/worldtweets">Source on Github</a></p>
+	</footer>
 
 <script>
 App.init();

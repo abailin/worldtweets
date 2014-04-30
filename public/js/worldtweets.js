@@ -5,7 +5,7 @@ var App = {
 	projection: null,
 	
 	config: {
-		remove_dot_ms: 15000							// how long to wait to remove map point
+		remove_dot_ms: 10000							// how long to wait to remove map point
 	},
 	
 	stats: {
@@ -32,8 +32,26 @@ var App = {
 		this.socket.on("stats", function(response) {
 			$(".server-total-count").text(response.data.tt);
 			$(".server-geo-count").text(response.data.gt);
-			$(".server-uptime").text(response.data.ut);
 			$(".server-connected-clients").text(response.data.cc);
+			
+			// uptime
+			var server_uptime_ms = response.data.ut;
+			var server_uptime_sec = Math.floor(response.data.ut / 1000);
+			var server_uptime_human = '';
+			
+			if (server_uptime_sec >= 3600) {
+				server_uptime_human += (Math.floor(server_uptime_sec / 3600) % 24) + ' hr';
+			}
+			if (server_uptime_sec >= 60) {
+				server_uptime_human += (Math.floor(server_uptime_sec / 60) % 60) + ' min ';
+			} 
+			
+			server_uptime_human += server_uptime_sec % 60 + ' sec';
+			$(".server-uptime").text(server_uptime_human);
+			
+			var tweets_per_sec = Math.round(response.data.tt / server_uptime_sec);
+			$(".tweets-per-sec").text(tweets_per_sec);
+						
 		});
 		
 		// when we get a "msg" update from server (coordinates)

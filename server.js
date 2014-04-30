@@ -6,6 +6,7 @@ var express = require('express');
 var app = express();
 var io = require('socket.io').listen(app.listen(port));
 var twitter = require('ntwitter');
+var less = require("less-middleware");
 
 var config = {};
 
@@ -43,6 +44,19 @@ app.configure(function() {
 });
 */
 
+// set up URL for css files (to be compiled from less on the fly)
+app.configure(function() {
+	app.use(less({
+		dest: __dirname + '/public/css',
+		src: __dirname + '/less',
+		prefix: '/css',
+		compress: true,
+		force: true
+	}));
+	
+	app.use(express.static(__dirname + '/public'));
+});
+
 // URL Routes
 app.get('/', function (req, res) {
 	res.sendfile(__dirname + '/public/index.html');
@@ -54,6 +68,10 @@ app.get('/json/world-50m.json', function(req, res) {
 
 app.get('/js/worldtweets.js', function(req, res) {
 	res.sendfile(__dirname + "/public/js/worldtweets.js");
+});
+
+app.get('/css/bootstrap-lumen.min.css', function(req, res) {
+	res.sendfile(__dirname + "/public/css/bootstrap-lumen.min.css");
 });
 
 
