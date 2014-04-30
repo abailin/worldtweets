@@ -34,13 +34,17 @@ var App = {
 			$(".server-geo-count").text(response.data.gt);
 			$(".server-connected-clients").text(response.data.cc);
 			
-			// uptime
+			// uptime: make human-readable string
 			var server_uptime_ms = response.data.ut;
 			var server_uptime_sec = Math.floor(response.data.ut / 1000);
 			var server_uptime_human = '';
 			
+			if (server_uptime_sec >= 86400) {
+				var days = Math.floor(server_uptime_sec / 86400);
+				server_uptime_human += days + (days===1?' day ' : ' days ');
+			}
 			if (server_uptime_sec >= 3600) {
-				server_uptime_human += (Math.floor(server_uptime_sec / 3600) % 24) + ' hr';
+				server_uptime_human += (Math.floor(server_uptime_sec / 3600) % 24) + ' hr ';
 			}
 			if (server_uptime_sec >= 60) {
 				server_uptime_human += (Math.floor(server_uptime_sec / 60) % 60) + ' min ';
