@@ -79,7 +79,7 @@ var App = {
 				setTimeout(function() {
 					circle.remove();
 					App.stats.num_tweets_mapped--;
-				}, App.config.remove_dot_ms);
+				}, 10000);
 			}
 			else if (data.message) {
 				console.log("Message from server: " + data.message);
