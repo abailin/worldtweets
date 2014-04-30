@@ -21,6 +21,8 @@
 	<script charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
 	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 	<script charset="utf-8" src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.1.0/topojson.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script charset="utf-8" src="/js/worldtweets.js"></script>
 </head>
 <body>
 	<h1>World Tweets</h1>
@@ -39,91 +41,9 @@
 	<div id="map"></div>
 
 
-	<script src="/socket.io/socket.io.js"></script>
-	<script>
-
-var socket = io.connect();
-var num_tweets = 0;
-
-var width = 960,
-		height = 700;
-
-var projection = d3.geo.stereographic()
-		.scale(245)
-		.translate([width / 2, height / 2])
-		.rotate([-20, 0])
-		.clipAngle(180 - 1e-4)
-		.clipExtent([[0, 0], [width, height]])
-		.precision(.1);
-
-var path = d3.geo.path()
-		.projection(projection);
-
-var graticule = d3.geo.graticule();
-
-var svg = d3.select("#map").append("svg")
-		.attr("width", width)
-		.attr("height", height);
-
-svg.append("path")
-		.datum(graticule)
-		.attr("class", "graticule")
-		.attr("d", path);
-
-d3.json("/json/world-50m.json", function(error, world) {
-	svg.insert("path", ".graticule")
-			.datum(topojson.feature(world, world.objects.land))
-			.attr("class", "land")
-			.attr("d", path);
-
-	svg.insert("path", ".graticule")
-			.datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
-			.attr("class", "boundary")
-			.attr("d", path);
-});
-
-d3.select(self.frameElement).style("height", height + "px");
-
-var fill_colors = ["red", "green", "blue", "yellow", "cyan", "magenta"];
-var num_tweets_mapped = 0;
-
-socket.on("stats", function(response) {
-	// update total server tweets processed
-	$(".server-total-count").text(response.data.tt);
-	$(".server-geo-count").text(response.data.gt);
-	$(".server-uptime").text(response.data.ut);
-	$(".server-connected-clients").text(response.data.cc);
-});
-
-socket.on("msg", function(data) {
-	
-	num_tweets_mapped++;
-	$(".tweet-count").text(num_tweets_mapped);
-
-	if (data.coords) {
-		// place point on map
-		var p = projection([data.coords[0], data.coords[1]]);
-		var circle = svg.append("circle")
-			.attr("cx", p[0])
-			.attr("cy", p[1])
-			.attr("r", 4)
-			//.attr("fill", fill_colors[num_tweets_mapped%6])
-			.attr("fill","red")
-			.attr("opacity", 0.6);
-
-		// remove point after some time
-		setTimeout(function() {
-			circle.remove();
-			num_tweets_mapped--;
-		}, 15000);
-	}
-	else if (data.message) {
-		console.log("Message from server: " + data.message);
-	}
-	
-});
-
-	</script>
+<script>
+App.init();
+</script>
 
 </body>
 </html>

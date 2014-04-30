@@ -6,6 +6,7 @@ var express = require('express');
 var app = express();
 var io = require('socket.io').listen(app.listen(port));
 var twitter = require('ntwitter');
+
 var config = {};
 
 try {
@@ -29,6 +30,19 @@ var stats = {
 	time_start: Date.now()
 };
 
+// set up coffeescript compiler URL, but we will use straight JS for now
+/*
+app.configure(function() {
+	app.use(coffee({
+		src: __dirname + '/public/js',
+		compress: true,
+		prefix: '/js'
+	}));
+
+	app.use(express.static(__dirname + '/public/js'));
+});
+*/
+
 // URL Routes
 app.get('/', function (req, res) {
 	res.sendfile(__dirname + '/public/index.html');
@@ -38,6 +52,9 @@ app.get('/json/world-50m.json', function(req, res) {
 	res.sendfile(__dirname + "/public/json/world-50m.json");
 });
 
+app.get('/js/worldtweets.js', function(req, res) {
+	res.sendfile(__dirname + "/public/js/worldtweets.js");
+});
 
 
 console.log(' >> Listening on port ' + port);
@@ -55,7 +72,6 @@ io.sockets.on('connection', function (socket)
 
 });
 
-
 // instantiate twitter class
 var twit = new twitter({
 	consumer_key: config.twitter.consumer_key,
@@ -70,7 +86,7 @@ twit.stream('statuses/filter', {'locations':'-180,-90,180,90'}, function(stream)
 		stats.total_tweets++;
 		if (data.coordinates && data.coordinates.type == 'Point') {
 			stats.geo_tweets++;
-			io.sockets.emit('msg', { coords: data.coordinates.coordinates});
+			io.sockets.volatile.emit('msg', { coords: data.coordinates.coordinates});
 		}
 	});
 });
