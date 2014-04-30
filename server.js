@@ -84,7 +84,7 @@ var twit = new twitter({
 twit.stream('statuses/filter', {'locations':'-180,-90,180,90'}, function(stream) {
 	stream.on('data', function(data) {
 		stats.total_tweets++;
-		if (data.coordinates && data.coordinates.type == 'Point') {
+		if (data.coordinates && data.coordinates.type == 'Point' && data.coordinates.coordinates[0] != 0 && data.coordinates.coordinates[1] != 0) {
 			stats.geo_tweets++;
 			io.sockets.volatile.emit('msg', { coords: data.coordinates.coordinates});
 		}
