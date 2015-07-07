@@ -30,9 +30,12 @@ var App = {
 
 		// when we get a "stats" update from server
 		this.socket.on("stats", function(response) {
-			$(".server-total-count").text(response.data.tt);
-			$(".server-geo-count").text(response.data.gt);
+			$(".server-total-count").text(response.data.tt.toLocaleString());
+			$(".server-geo-count").text(response.data.gt.toLocaleString());
 			$(".server-connected-clients").text(response.data.cc);
+
+			// calculate % of incoming tweets which have geo info
+			$(".server-geo-pct").text( Math.round( response.data.gt / response.data.tt * 100 ).toString() );
 			
 			// uptime: make human-readable string
 			var server_uptime_ms = response.data.ut;
