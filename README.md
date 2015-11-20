@@ -18,7 +18,6 @@ foreman start # (or node server.js)
 
 ``` bash
 heroku create
-heroku labs:enable websockets
 ```
 
 You will need to set the twitter config vars that are normally specified in config.js. To do so run:
