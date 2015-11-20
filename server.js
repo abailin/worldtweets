@@ -2,11 +2,15 @@ try { require('newrelic'); } catch(e) { }
 
 // heroku assigns port randomly, when running locally, port==5000
 var port = process.env.PORT || 5000;
+
 var express = require('express');
 var app = express();
-var io = require('socket.io').listen(app.listen(port));
-var twitter = require('ntwitter');
-var less = require("less-middleware");
+var server = require('http').createServer(app);
+
+var io = require('socket.io')(server);
+
+var less = require('express-less');
+var Twitter = require('twitter');
 
 var config = {};
 
@@ -24,6 +28,8 @@ try {
 	};
 }
 
+server.listen(port);
+
 var stats = {
 	total_tweets: 0,
 	geo_tweets: 0,
@@ -31,53 +37,30 @@ var stats = {
 	time_start: Date.now()
 };
 
-// set up coffeescript compiler URL, but we will use straight JS for now
-/*
-app.configure(function() {
-	app.use(coffee({
-		src: __dirname + '/public/js',
-		compress: true,
-		prefix: '/js'
-	}));
 
-	app.use(express.static(__dirname + '/public/js'));
-});
-*/
-
-// set up URL for css files (to be compiled from less on the fly)
-app.configure(function() {
-	app.use(less({
-		dest: __dirname + '/public/css',
-		src: __dirname + '/less',
-		prefix: '/css',
-		compress: true,
-		force: true
-	}));
-	
-	app.use(express.static(__dirname + '/public'));
-});
+app.use('/css', less(__dirname + '/less', {compress: true}));
 
 // URL Routes
 app.get('/', function (req, res) {
-	res.sendfile(__dirname + '/public/index.html');
+	res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('/json/world-50m.json', function(req, res) {
-	res.sendfile(__dirname + "/public/json/world-50m.json");
+	res.sendFile(__dirname + "/public/json/world-50m.json");
 });
 
 app.get('/js/worldtweets.js', function(req, res) {
-	res.sendfile(__dirname + "/public/js/worldtweets.js");
+	res.sendFile(__dirname + "/public/js/worldtweets.js");
 });
 
 app.get('/css/bootstrap-lumen.min.css', function(req, res) {
-	res.sendfile(__dirname + "/public/css/bootstrap-lumen.min.css");
+	res.sendFile(__dirname + "/public/css/bootstrap-lumen.min.css");
 });
 
 
 console.log(' >> Listening on port ' + port);
 
-io.sockets.on('connection', function (socket)
+io.on('connection', function (socket)
 {
 	socket.emit('msg', { message: 'Welcome.' });
 
@@ -86,26 +69,31 @@ io.sockets.on('connection', function (socket)
 	socket.on('disconnect', function() {
 		stats.connected_clients--;
 	});
-
-
 });
 
 // instantiate twitter class
-var twit = new twitter({
+var T = new Twitter({
 	consumer_key: config.twitter.consumer_key,
 	consumer_secret: config.twitter.consumer_secret,
 	access_token_key: config.twitter.access_token_key,
 	access_token_secret: config.twitter.access_token_secret
 });
 
+
 // tap into dat stream
-twit.stream('statuses/filter', {'locations':'-180,-90,180,90'}, function(stream) {
+T.stream('statuses/filter', {'locations':'-180,-90,180,90'}, function(stream) {
+
 	stream.on('data', function(data) {
 		stats.total_tweets++;
 		if (data.coordinates && data.coordinates.type == 'Point' && data.coordinates.coordinates[0] != 0 && data.coordinates.coordinates[1] != 0) {
 			stats.geo_tweets++;
-			io.sockets.volatile.emit('msg', { coords: data.coordinates.coordinates});
+			io.emit('msg', { coords: data.coordinates.coordinates});
 		}
+	});
+
+	stream.on('error', function(err) {
+		console.log('error!');
+		console.log(err);
 	});
 });
 
@@ -115,7 +103,7 @@ setInterval(function() {
 }, 1000);
 
 function print_status() {
-	io.sockets.emit('stats', { data: { 
+	io.emit('stats', { data: { 
 		tt: stats.total_tweets, // total tweets
 		gt: stats.geo_tweets, // geo tweets
 		ut: Date.now() - stats.time_start, // uptime in ms
