@@ -1,0 +1,23 @@
+{
+  "name": "worldtweets",
+  "description": "",
+  "main": "",
+  "authors": [
+    "Adam Bailin <abailin@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/abailin/worldtweets",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "^3.5.14",
+    "jquery": "^2.2.0",
+    "topojson": "^1.6.22"
+  }
+}

@@ -49,8 +49,8 @@ app.get('/json/world-50m.json', function(req, res) {
 	res.sendFile(__dirname + "/public/json/world-50m.json");
 });
 
-app.get('/js/worldtweets.js', function(req, res) {
-	res.sendFile(__dirname + "/public/js/worldtweets.js");
+app.get('/js/app.min.js', function(req, res) {
+	res.sendFile(__dirname + "/public/js/app.min.js");
 });
 
 app.get('/css/bootstrap-lumen.min.css', function(req, res) {
