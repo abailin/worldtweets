@@ -1,7 +1,7 @@
 World Tweets
 ===========
 
-Real time mapping of public tweets sampled from [Twitter's Streaming API](https://dev.twitter.com/docs/streaming-apis/streams/public), delivered to your browser using [socket.io](http://socket.io), and mapped using [D3.js](http://d3js.org).
+Real time mapping of public tweets sampled from [Twitter's Streaming API](https://dev.twitter.com/streaming/public), delivered to your browser using [socket.io](http://socket.io), and mapped using [D3.js](http://d3js.org).
 
 Demo [here](http://worldtweets.abailin.com).
 
@@ -14,7 +14,6 @@ Then run:
 npm install
 foreman start # (or node server.js)
 ```
-
 
 # Running on Heroku
 
